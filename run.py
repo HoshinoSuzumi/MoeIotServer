@@ -23,7 +23,7 @@ def make_response(type, errno, msg, data=None, str_mode=False):
     }
     return str(json.dumps(response)) if str_mode else json.dumps(response)
 
-
+# 233
 def do_action(inst, bundle):
     action = None
     data = None
