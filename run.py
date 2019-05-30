@@ -26,8 +26,10 @@ def make_response(type, errno, msg, data=None, str_mode=False):
 
 def do_action(inst, bundle):
     action = None
+    data = None
     try:
         action = bundle['action']
+        data = bundle['data']
     except Exception as e:
         inst.sendMessage(make_response('common', -1, 'Bad request'))
     if action is not None:
@@ -36,10 +38,21 @@ def do_action(inst, bundle):
         else:
             try:
                 if action == 'get':
-                    inst.sendMessage(make_response('temp', 0, 'success', {
-                        'id:': 1,
-                        'value': random.randint(0, 1000) / 10
-                    }))
+                    if data['type'] == 'temp':
+                        inst.sendMessage(make_response('temp', 0, 'success', {
+                            'id:': 1,
+                            'value': random.randint(0, 1000) / 10
+                        }))
+                    elif data['type'] == 'humi':
+                        inst.sendMessage(make_response('humi', 0, 'success', {
+                            'id:': 1,
+                            'value': random.randint(0, 1000) / 10
+                        }))
+                    elif data['type'] == 'illu':
+                        inst.sendMessage(make_response('illu', 0, 'success', {
+                            'id:': 1,
+                            'value': random.randint(0, 1000)
+                        }))
                 elif action == 'set':
                     inst.sendMessage(make_response('set', 0, 'success'))
                 elif action == 'ping':
