@@ -1,9 +1,21 @@
 import json
 import time
 import random
+import dht11
+import RPi.GPIO as GPIO
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
 
 ACTIONS = ['get', 'set', 'ping']
+DHT_HOLDER = dht11.DHT11(pin=1)
+
+last_read = 0
+curr_temp = 0
+curr_humi = 0
+
+# initialize GPIO
+GPIO.setwarnings(False)
+GPIO.setmode(GPIO.BCM)
+GPIO.cleanup()
 
 
 def parse_request(bundle):
@@ -25,6 +37,7 @@ def make_response(type, errno, msg, data=None, str_mode=False):
 
 
 def do_action(inst, bundle):
+    global curr_temp, curr_humi, last_read
     action = None
     data = None
     try:
@@ -38,19 +51,28 @@ def do_action(inst, bundle):
         else:
             try:
                 if action == 'get':
+                    if (int(time.time()) - last_read) >= 2:
+                        dhtdata = DHT_HOLDER.read()
+                        if dhtdata.is_valid():
+                            last_read = int(time.time())
+                            curr_temp = dhtdata.temperature
+                            curr_humi = dhtdata.humidity
                     if data['type'] == 'temp':
                         inst.sendMessage(make_response('temp', 0, 'success', {
                             'id:': 1,
-                            'value': random.randint(0, 1000) / 10
+                            'updated': last_read,
+                            'value': curr_temp
                         }))
                     elif data['type'] == 'humi':
                         inst.sendMessage(make_response('humi', 0, 'success', {
                             'id:': 1,
-                            'value': random.randint(0, 1000) / 10
+                            'updated': last_read,
+                            'value': curr_humi
                         }))
                     elif data['type'] == 'illu':
                         inst.sendMessage(make_response('illu', 0, 'success', {
                             'id:': 1,
+                            'updated': last_read,
                             'value': random.randint(0, 1000)
                         }))
                 elif action == 'set':
