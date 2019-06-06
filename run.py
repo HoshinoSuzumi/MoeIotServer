@@ -1,6 +1,5 @@
 import json
 import time
-import random
 import dht11
 import RPi.GPIO as GPIO
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
@@ -86,7 +85,6 @@ def do_action(inst, bundle):
                     state = 0 if sw_state[index] == 1 else 1
 
                     GPIO.output(pin, state)
-                    print('Pin: %s | State: %s' % (pin, state))
                     inst.sendMessage(make_response('set', 0, 'success'))
                 elif action == 'ping':
                     inst.sendMessage(make_response('pong', 0, 'pong'))
